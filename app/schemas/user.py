@@ -1,7 +1,17 @@
-from pydantic import BaseModel, EmailStr
+from typing import Literal
+from pydantic import BaseModel, EmailStr, Field
+
 
 class UserCreate(BaseModel):
-    name: str
+    name: str = Field(min_length=3, max_length=50)
     email: EmailStr
-    phone: str
-    status: str = "active"
+    phone: str = Field(pattern=r"^\d{10}$")
+    status: Literal["active", "inactive"] = "active"
+
+
+class UserResponse(BaseModel):
+    id: int
+    name: str = Field(min_length=3, max_length=50)
+    email: EmailStr
+    phone: str = Field(pattern=r"^\d{10}$")
+    status: Literal["active", "inactive"]
