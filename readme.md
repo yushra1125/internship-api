@@ -83,6 +83,38 @@ A REST API built using Python, FastAPI, SQLAlchemy, and PostgreSQL. This project
 
    Replace `YOUR_PASSWORD` with your PostgreSQL password.
 
+## Alembic Migrations
+
+Alembic is used to manage database schema changes and track migration versions.
+
+Useful commands:
+
+Check the current migration version:
+
+```bash
+alembic current
+```
+
+Generate a migration after changing database models:
+
+```bash
+alembic revision --autogenerate -m "describe your changes"
+```
+
+Apply pending migrations:
+
+```bash
+alembic upgrade head
+```
+
+Revert the last migration:
+
+```bash
+alembic downgrade -1
+```
+
+The existing database has been registered with a baseline migration.
+
 ## Run the API
 
 Start the development server:
@@ -132,7 +164,3 @@ Returns the API health status.
 ## Git Branch
 
 `feature/api-setup`
-
-## Author
-
-Internship Project – AS Infosolution
