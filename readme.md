@@ -1,43 +1,138 @@
-Internship API
+# Internship API
 
-A basic API created using Python and FastAPI.
+A REST API built using Python, FastAPI, SQLAlchemy, and PostgreSQL. This project manages users and their assigned tasks with database integration and input validation.
 
-Tools Used
+## Technologies Used
 
-Python
+- Python
+- FastAPI
+- Uvicorn
+- PostgreSQL
+- SQLAlchemy
+- Pydantic
+- Alembic
+- Git and GitHub
+- Postman
 
-VS Code
+## Features
 
-Git
+### User Management
+- Create a user
+- Get all users
+- Get user by ID
+- Update user details
+- Delete a user
+- View user details with assigned tasks
 
-FastAPI
+### Task Management
+- Create a task and assign it to a user
+- Get all tasks
+- Get task by ID
+- Update a task
+- Delete a task
+- Filter tasks by status
 
-Uvicorn
+### Validation and Error Handling
+- Pydantic request validation
+- Custom 404 error responses
+- Custom 422 validation error responses
+- Check whether an assigned user exists
 
-Setup Steps
+## Project Setup
 
-Installed Python, VS Code, Git and Postman.
+1. Clone the repository:
 
-Created a project folder named internship-api.
+   ```bash
+   git clone https://github.com/yushra1125/internship-api.git
+   ```
 
-Created a virtual environment using python -m venv venv.
+2. Open the project folder:
 
-Activated the virtual environment.
+   ```bash
+   cd internship-api
+   ```
 
-Installed FastAPI and Uvicorn.
+3. Create a virtual environment:
 
-Created main.py and configured the API.
+   ```bash
+   python -m venv venv
+   ```
 
-Created a feature branch named feature/api-setup.
+4. Activate the virtual environment:
 
-Made the initial Git commit.
+   ```bash
+   venv\Scripts\activate
+   ```
 
-Run the API
+5. Install dependencies:
 
-Activate the virtual environment:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-venv\Scripts\activate
+## Database Configuration
 
-Start the API:
+1. Install PostgreSQL.
+2. Create a database named `internship_db`.
+3. Create a `.env` file in the project root directory.
+4. Add your database connection string:
 
+   ```env
+   DATABASE_URL=postgresql+psycopg2://postgres:YOUR_PASSWORD@localhost:5432/internship_db
+   ```
+
+   Replace `YOUR_PASSWORD` with your PostgreSQL password.
+
+## Run the API
+
+Start the development server:
+
+```bash
 python -m uvicorn main:app --reload
+```
+
+Open the interactive API documentation:
+
+`http://127.0.0.1:8000/docs`
+
+## API Endpoints
+
+### Users
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/users` | Create user |
+| GET | `/users` | Get all users |
+| GET | `/users/{user_id}` | Get user by ID |
+| PUT | `/users/{user_id}` | Update user |
+| DELETE | `/users/{user_id}` | Delete user |
+
+### Tasks
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/tasks` | Create task |
+| GET | `/tasks` | Get all tasks |
+| GET | `/tasks/{task_id}` | Get task by ID |
+| PUT | `/tasks/{task_id}` | Update task |
+| DELETE | `/tasks/{task_id}` | Delete task |
+
+Filter tasks by status:
+
+`GET /tasks?task_status=pending`
+
+Available statuses: `pending`, `in_progress`, `completed`.
+
+## Health Check
+
+`GET /health`
+
+Returns the API health status.
+
+## Git Branch
+
+`feature/api-setup`
+
+## Author
+
+Internship Project – AS Infosolution
