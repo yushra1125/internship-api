@@ -4,11 +4,13 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
 from app.routers.user import router as users_router
-from app.routers.task import router as tasks_router
+from app.routers.tasks import router as tasks_router
+from app.routers.auth import router as auth_router
 app = FastAPI()
 
 app.include_router(users_router)
 app.include_router(tasks_router)
+app.include_router(auth_router)
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(

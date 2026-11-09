@@ -2,8 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.dependencies import get_current_teacher
+from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse
-from app.services.user_service import (
+from app.services.user_services import (
     create_user,
     get_all_users,
     get_user_by_id,
@@ -19,17 +21,28 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
     response_model=UserResponse
 )
-def add_user(user_data: UserCreate, db: Session = Depends(get_db)):
+def add_user(
+    user_data: UserCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_teacher)
+):
     return create_user(db, user_data)
 
 
 @router.get("/users", response_model=list[UserResponse])
-def read_users(db: Session = Depends(get_db)):
+def read_users(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_teacher)
+):
     return get_all_users(db)
 
 
 @router.get("/users/{user_id}", response_model=UserResponse)
-def read_user(user_id: int, db: Session = Depends(get_db)):
+def read_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_teacher)
+):
     user = get_user_by_id(db, user_id)
 
     if user is None:
@@ -42,7 +55,8 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 def edit_user(
     user_id: int,
     user_data: UserCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_teacher)
 ):
     user = update_user(db, user_id, user_data)
 
@@ -53,7 +67,11 @@ def edit_user(
 
 
 @router.delete("/users/{user_id}")
-def remove_user(user_id: int, db: Session = Depends(get_db)):
+def remove_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_teacher)
+):
     deleted = delete_user(db, user_id)
 
     if not deleted:

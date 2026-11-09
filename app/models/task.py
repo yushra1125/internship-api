@@ -10,14 +10,31 @@ class Task(Base):
     __tablename__ = "tasks"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    title: Mapped[str] = mapped_column(String(150), nullable=False)
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    status: Mapped[str] = mapped_column(String(20), default="pending")
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    title: Mapped[str] = mapped_column(
+        String(150), nullable=False
+    )
+
+    description: Mapped[str | None] = mapped_column(
+        Text, nullable=True
+    )
+
+    status: Mapped[str] = mapped_column(
+        String(20), default="pending"
+    )
+
+    work_note: Mapped[str | None] = mapped_column(
+        Text, nullable=True
+    )
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"), nullable=False
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
 
-    user: Mapped["User"] = relationship(back_populates="tasks")
+    user: Mapped["User"] = relationship(
+        back_populates="tasks"
+    )

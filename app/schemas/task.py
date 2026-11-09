@@ -1,4 +1,5 @@
 from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -9,6 +10,11 @@ class TaskCreate(BaseModel):
     user_id: int
 
 
+class TaskStudentUpdate(BaseModel):
+    status: Literal["pending", "in_progress", "completed"] | None = None
+    work_note: str | None = None
+
+
 class TaskResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -16,4 +22,5 @@ class TaskResponse(BaseModel):
     title: str
     description: str | None
     status: Literal["pending", "in_progress", "completed"]
+    work_note: str | None = None
     user_id: int
