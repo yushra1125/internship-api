@@ -1,3 +1,4 @@
+
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -16,7 +17,6 @@ from app.services.task_services import (
     delete_task
 )
 from app.dependencies import (
-    get_current_user,
     get_current_teacher,
     get_current_student
 )
@@ -49,7 +49,7 @@ def add_task(
 # Teacher: View all tasks
 @router.get("/tasks", response_model=list[TaskResponse])
 def read_tasks(
-    task_status: Literal["pending", "in_progress", "completed"] | None = None,
+    task_status: Literal["pending", "in_progress", "done"] | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_teacher)
 ):
@@ -75,7 +75,10 @@ def read_task(
     task = get_task_by_id(db, task_id)
 
     if task is None:
-        raise HTTPException(status_code=404, detail="Task not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found"
+        )
 
     return task
 
@@ -133,6 +136,9 @@ def remove_task(
     deleted = delete_task(db, task_id)
 
     if not deleted:
-        raise HTTPException(status_code=404, detail="Task not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found"
+        )
 
     return {"message": "Task deleted successfully"}
