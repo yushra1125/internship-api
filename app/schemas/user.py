@@ -1,3 +1,4 @@
+
 from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
@@ -16,7 +17,7 @@ class TaskInfo(BaseModel):
     id: int
     title: str
     description: str | None
-    status: Literal["pending", "in_progress", "completed"]
+    status: Literal["pending", "in_progress", "done"]
 
 
 class UserResponse(BaseModel):

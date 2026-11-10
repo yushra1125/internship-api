@@ -1,97 +1,82 @@
-# Internship API
+﻿# Internship API
 
-A REST API built using Python, FastAPI, SQLAlchemy, and PostgreSQL. This project provides secure user authentication, JWT-based authorization, role-based access control (RBAC), and task management.
+A REST API built using Python 3.13, FastAPI, SQLAlchemy, and PostgreSQL. It provides JWT authentication, session management, role-based access control (RBAC), and secure task management for teachers and students.
 
 ## Technologies Used
 
 - Python 3.13
-- FastAPI
-- Uvicorn
+- FastAPI and Uvicorn
 - PostgreSQL
 - SQLAlchemy
 - Pydantic
 - Alembic
-- JWT Authentication
-- Password Hashing
+- JWT authentication
+- Password hashing
+- Pytest
 - Git and GitHub
 - Swagger UI
 
 ## Features
 
 ### Authentication
-- User registration and login
-- Secure password hashing
+- Student registration and login
+- Secure password hashing (passwords are never stored as plain text)
 - JWT access and refresh tokens
-- Token refresh functionality
+- Access-token expiry and refresh functionality
+- Session tracking and refresh-token hashing
 - Logout with session revocation
-- Get currently authenticated user profile
-- Session expiry and revoked-token validation
+- Authenticated user profile endpoint
+- Rejection of expired and revoked sessions
 
 ### Role-Based Access Control
 
 **Teacher**
 - Create and assign tasks to students
-- View all tasks
+- View all tasks and users
+- View individual tasks and user details
 - Update and delete tasks
-- View users and their information
 
 **Student**
-- View only assigned tasks
+- View only their assigned tasks
 - Update their own task status
-- Add and update work notes
+- Add work notes
 - View their own profile
 - Cannot create, assign, or delete tasks
-- Cannot access other students' tasks
+- Cannot access another student's tasks or teacher-only data
 
 ### Task Management
-- Create and assign tasks
-- Get all tasks (teacher only)
-- Get tasks assigned to the logged-in student
-- Get task by ID (teacher only)
-- Update and delete tasks (teacher only)
-- Update task status and work notes (student only)
 
 Available task statuses:
 - `pending`
 - `in_progress`
-- `completed`
+- `done`
 
 ### Validation and Error Handling
 - Pydantic request validation
-- Password verification
+- Invalid login rejection
 - Authentication and authorization checks
-- Custom 404 error responses
 - 401 Unauthorized responses
 - 403 Forbidden responses
+- 404 Not Found responses
 - 422 Validation error responses
 
 ## Project Setup
 
-1. Clone the repository:
+Clone the repository:
 
 ```bash
 git clone https://github.com/yushra1125/internship-api.git
-```
-
-2. Open the project folder:
-
-```bash
 cd internship-api
 ```
 
-3. Create a virtual environment:
+Create and activate a virtual environment:
 
 ```bash
 python -m venv venv
-```
-
-4. Activate the virtual environment:
-
-```bash
 venv\Scripts\activate
 ```
 
-5. Install dependencies:
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -101,32 +86,32 @@ pip install -r requirements.txt
 
 1. Install PostgreSQL.
 2. Create a database named `internship_db`.
-3. Create a `.env` file in the project root directory.
-4. Add the following environment variables:
+3. Create a `.env` file in the project root.
+4. Add the following variables:
 
 ```env
 DATABASE_URL=postgresql+psycopg2://postgres:YOUR_PASSWORD@localhost:5432/internship_db
 SECRET_KEY=YOUR_SECRET_KEY
 ```
 
-Replace the placeholders with your own PostgreSQL password and a secure secret key.
+Replace the database password with your own PostgreSQL password.
 
-**Important:** Never commit your `.env` file or real passwords to GitHub.
+Generate a secure secret key locally using:
 
-## Alembic Migrations
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
 
-Alembic is used to manage database schema changes.
+Copy the generated value into `SECRET_KEY` in your local `.env` file.
+
+**Important:** Never commit `.env`, database passwords, secret keys, or access tokens to GitHub.
+
+## Database Migrations
 
 Check the current migration version:
 
 ```bash
 alembic current
-```
-
-Generate a migration after changing database models:
-
-```bash
-alembic revision --autogenerate -m "describe your changes"
 ```
 
 Apply migrations:
@@ -135,11 +120,31 @@ Apply migrations:
 alembic upgrade head
 ```
 
-Revert the last migration:
+Generate a migration after changing database models:
+
+```bash
+alembic revision --autogenerate -m "describe your changes"
+```
+
+Revert the last migration if required:
 
 ```bash
 alembic downgrade -1
 ```
+
+## Create a Teacher Account
+
+Run the seed script:
+
+```bash
+python seed.py
+```
+
+Follow the prompts to create the teacher account. Use your own credentials locally.
+
+Students can register through:
+
+`POST /auth/register`
 
 ## Run the API
 
@@ -149,7 +154,7 @@ Start the development server:
 python -m uvicorn main:app --reload
 ```
 
-Open Swagger UI:
+Swagger UI:
 
 http://127.0.0.1:8000/docs
 
@@ -161,58 +166,63 @@ http://127.0.0.1:8000/docs
 |---|---|---|
 | POST | `/auth/register` | Register a student |
 | POST | `/auth/login` | Login and receive tokens |
-| POST | `/auth/refresh` | Refresh access token |
+| POST | `/auth/refresh` | Refresh tokens |
 | POST | `/auth/logout` | Revoke session |
 | GET | `/auth/me` | Get current user profile |
 
-### Users
+### Users (Teacher only)
 
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | `/users` | Create user (as permitted by role) |
-| GET | `/users` | Get all users (teacher only) |
+| POST | `/users` | Create a user |
+| GET | `/users` | Get all users |
 | GET | `/users/{user_id}` | Get user by ID |
+| PUT | `/users/{user_id}` | Update a user |
+| DELETE | `/users/{user_id}` | Delete a user |
 
 ### Tasks
 
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | `/tasks` | Create and assign task (teacher) |
+| POST | `/tasks` | Create and assign a task (teacher) |
 | GET | `/tasks` | Get all tasks (teacher) |
 | GET | `/tasks/my` | Get own assigned tasks (student) |
 | GET | `/tasks/{task_id}` | Get task by ID (teacher) |
-| PUT | `/tasks/{task_id}` | Update task (teacher) |
+| PUT | `/tasks/{task_id}` | Update a task (teacher) |
 | PATCH | `/tasks/{task_id}/work` | Update own task status and work note (student) |
-| DELETE | `/tasks/{task_id}` | Delete task (teacher) |
+| DELETE | `/tasks/{task_id}` | Delete a task (teacher) |
 
 ## Authentication Flow
 
-1. Register a student or use an existing teacher account.
+1. Register a student or create a teacher account using the seed script.
 2. Login using email and password.
 3. Receive an access token and refresh token.
-4. Authorize requests using the access token.
-5. Use the refresh endpoint to obtain new tokens.
-6. Logout to revoke the current session.
+4. Use the access token as a Bearer token for protected endpoints.
+5. Use the refresh endpoint when a new token pair is needed.
+6. Logout to revoke the session.
 
-Protected endpoints require a valid access token.
+Protected endpoints require a valid access token and an active session.
 
 ## Testing
 
-API endpoints can be tested using Swagger UI or Postman.
+Run automated tests:
 
-The following scenarios were tested:
+```bash
+python -m pytest -q
+```
 
-- Teacher login and authentication
-- Student login and authentication
-- Teacher creates and assigns tasks
-- Student views assigned tasks
-- Student updates task status and work notes
-- Student cannot create or delete tasks
-- Student cannot access another student's task
-- Student cannot access the teacher-only users list
-- Invalid login credentials
+The test suite covers:
+
+- User creation and input validation
+- Successful and unsuccessful login
+- Authenticated profile access
 - Missing authentication token
-- User profile access
+- Logout and session revocation
+- Refresh-token rejection after logout
+- Student access to their own tasks
+- Student task-status and work-note updates
+- Student restrictions on task creation and deletion
+- Prevention of access to another student's tasks
 
 ## Git Branch
 

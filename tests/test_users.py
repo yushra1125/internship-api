@@ -1,12 +1,7 @@
-from fastapi.testclient import TestClient
-from main import app
-
-client = TestClient(app)
-
-
-def test_create_user():
+﻿def test_create_user(client, teacher_token):
     response = client.post(
         "/users",
+        headers={"Authorization": f"Bearer {teacher_token}"},
         json={
             "name": "Test User",
             "email": "testuser@gmail.com",
@@ -18,9 +13,10 @@ def test_create_user():
     assert response.json()["name"] == "Test User"
 
 
-def test_invalid_email():
+def test_invalid_email(client, teacher_token):
     response = client.post(
         "/users",
+        headers={"Authorization": f"Bearer {teacher_token}"},
         json={
             "name": "Test User",
             "email": "invalidemail",
@@ -32,14 +28,20 @@ def test_invalid_email():
     assert response.json()["success"] is False
 
 
-def test_user_not_found():
-    response = client.get("/users/999999")
+def test_user_not_found(client, teacher_token):
+    response = client.get(
+        "/users/999999",
+        headers={"Authorization": f"Bearer {teacher_token}"}
+    )
 
     assert response.status_code == 404
     assert response.json()["success"] is False
-def test_missing_email():
+
+
+def test_missing_email(client, teacher_token):
     response = client.post(
         "/users",
+        headers={"Authorization": f"Bearer {teacher_token}"},
         json={
             "name": "Test User",
             "phone": "9876543210"
@@ -48,9 +50,12 @@ def test_missing_email():
 
     assert response.status_code == 422
     assert response.json()["success"] is False
-def test_wrong_phone_type():
+
+
+def test_wrong_phone_type(client, teacher_token):
     response = client.post(
         "/users",
+        headers={"Authorization": f"Bearer {teacher_token}"},
         json={
             "name": "Test User",
             "email": "testuser@gmail.com",
@@ -60,9 +65,12 @@ def test_wrong_phone_type():
 
     assert response.status_code == 422
     assert response.json()["success"] is False
-def test_name_too_long():
+
+
+def test_name_too_long(client, teacher_token):
     response = client.post(
         "/users",
+        headers={"Authorization": f"Bearer {teacher_token}"},
         json={
             "name": "A" * 51,
             "email": "testuser@gmail.com",
