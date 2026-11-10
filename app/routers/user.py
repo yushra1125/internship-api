@@ -2,15 +2,16 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_teacher
+from app.dependencies import get_current_teacher, get_current_student
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserResponse, UserProfileUpdate
 from app.services.user_services import (
     create_user,
     get_all_users,
     get_user_by_id,
     update_user,
-    delete_user
+    delete_user,
+    update_own_profile
 )
 
 router = APIRouter()
@@ -35,6 +36,21 @@ def read_users(
     current_user: User = Depends(get_current_teacher)
 ):
     return get_all_users(db)
+
+
+@router.patch("/users/me", response_model=UserResponse)
+def update_my_profile(
+    user_data: UserProfileUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_student)
+):
+    try:
+        return update_own_profile(db, current_user, user_data)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(error)
+        )
 
 
 @router.get("/users/{user_id}", response_model=UserResponse)

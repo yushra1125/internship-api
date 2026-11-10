@@ -1,4 +1,7 @@
-﻿def test_login_success(client):
+﻿from datetime import datetime, timedelta, timezone
+import jwt
+from app.security import SECRET_KEY, ALGORITHM
+def test_login_success(client):
     response = client.post(
         "/auth/login",
         json={
@@ -87,6 +90,44 @@ def test_refresh_after_logout_fails(client):
     response = client.post(
         "/auth/refresh",
         json={"refresh_token": refresh_token}
+    )
+
+    assert response.status_code == 401
+def test_expired_access_token_rejected(client):
+    expired_token = jwt.encode(
+        {
+            "sub": "1",
+            "sid": 1,
+            "type": "access",
+            "exp": datetime.now(timezone.utc) - timedelta(minutes=1)
+        },
+        SECRET_KEY,
+        algorithm=ALGORITHM
+    )
+
+    response = client.get(
+        "/auth/me",
+        headers={"Authorization": f"Bearer {expired_token}"}
+    )
+
+    assert response.status_code == 401
+
+
+def test_expired_refresh_token_rejected(client):
+    expired_token = jwt.encode(
+        {
+            "sub": "1",
+            "sid": 1,
+            "type": "refresh",
+            "exp": datetime.now(timezone.utc) - timedelta(minutes=1)
+        },
+        SECRET_KEY,
+        algorithm=ALGORITHM
+    )
+
+    response = client.post(
+        "/auth/refresh",
+        json={"refresh_token": expired_token}
     )
 
     assert response.status_code == 401

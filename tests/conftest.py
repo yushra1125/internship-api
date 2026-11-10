@@ -69,3 +69,27 @@ def teacher_token(client):
     )
     assert response.status_code == 200
     return response.json()["access_token"]
+@pytest.fixture
+def student_token(client):
+    register_response = client.post(
+        "/auth/register",
+        json={
+            "name": "Test Student",
+            "email": "student-test@example.com",
+            "phone": "9876543211",
+            "password": "TestStudent@123",
+        },
+    )
+
+    assert register_response.status_code == 201
+
+    login_response = client.post(
+        "/auth/login",
+        json={
+            "email": "student-test@example.com",
+            "password": "TestStudent@123",
+        },
+    )
+
+    assert login_response.status_code == 200
+    return login_response.json()["access_token"]

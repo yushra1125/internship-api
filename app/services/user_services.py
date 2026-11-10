@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.models.user import User
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserProfileUpdate
 
 
 def create_user(db: Session, user_data: UserCreate):
@@ -47,3 +47,29 @@ def delete_user(db: Session, user_id: int):
     db.commit()
 
     return True
+
+
+def update_own_profile(
+    db: Session,
+    user: User,
+    user_data: UserProfileUpdate
+):
+    updates = user_data.model_dump(exclude_unset=True)
+
+    if "email" in updates and updates["email"] is not None:
+        existing_user = db.query(User).filter(
+            User.email == updates["email"],
+            User.id != user.id
+        ).first()
+
+        if existing_user:
+            raise ValueError("Email already registered")
+
+    for key, value in updates.items():
+        if value is not None:
+            setattr(user, key, value)
+
+    db.commit()
+    db.refresh(user)
+
+    return user

@@ -1,6 +1,6 @@
-﻿# Internship API
+# Internship API
 
-A REST API built using Python 3.13, FastAPI, SQLAlchemy, and PostgreSQL. It provides JWT authentication, session management, role-based access control (RBAC), and secure task management for teachers and students.
+A REST API built using Python 3.13, FastAPI, SQLAlchemy, and PostgreSQL. It provides secure JWT authentication, session management, role-based access control (RBAC), and task management for teachers and students.
 
 ## Technologies Used
 
@@ -10,8 +10,8 @@ A REST API built using Python 3.13, FastAPI, SQLAlchemy, and PostgreSQL. It prov
 - SQLAlchemy
 - Pydantic
 - Alembic
-- JWT authentication
-- Password hashing
+- JWT Authentication
+- Password Hashing
 - Pytest
 - Git and GitHub
 - Swagger UI
@@ -19,6 +19,7 @@ A REST API built using Python 3.13, FastAPI, SQLAlchemy, and PostgreSQL. It prov
 ## Features
 
 ### Authentication
+
 - Student registration and login
 - Secure password hashing (passwords are never stored as plain text)
 - JWT access and refresh tokens
@@ -41,17 +42,20 @@ A REST API built using Python 3.13, FastAPI, SQLAlchemy, and PostgreSQL. It prov
 - Update their own task status
 - Add work notes
 - View their own profile
+- Update their own profile (name, email, and phone)
 - Cannot create, assign, or delete tasks
 - Cannot access another student's tasks or teacher-only data
 
 ### Task Management
 
 Available task statuses:
+
 - `pending`
 - `in_progress`
 - `done`
 
 ### Validation and Error Handling
+
 - Pydantic request validation
 - Invalid login rejection
 - Authentication and authorization checks
@@ -96,7 +100,7 @@ SECRET_KEY=YOUR_SECRET_KEY
 
 Replace the database password with your own PostgreSQL password.
 
-Generate a secure secret key locally using:
+Generate a secure secret key locally:
 
 ```bash
 python -c "import secrets; print(secrets.token_urlsafe(48))"
@@ -170,15 +174,16 @@ http://127.0.0.1:8000/docs
 | POST | `/auth/logout` | Revoke session |
 | GET | `/auth/me` | Get current user profile |
 
-### Users (Teacher only)
+### Users
 
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | `/users` | Create a user |
-| GET | `/users` | Get all users |
-| GET | `/users/{user_id}` | Get user by ID |
-| PUT | `/users/{user_id}` | Update a user |
-| DELETE | `/users/{user_id}` | Delete a user |
+| POST | `/users` | Create a user (teacher) |
+| GET | `/users` | Get all users (teacher) |
+| GET | `/users/{user_id}` | Get user by ID (teacher) |
+| PUT | `/users/{user_id}` | Update a user (teacher) |
+| DELETE | `/users/{user_id}` | Delete a user (teacher) |
+| PATCH | `/users/me` | Update own profile (student) |
 
 ### Tasks
 
@@ -211,7 +216,7 @@ Run automated tests:
 python -m pytest -q
 ```
 
-The test suite covers:
+The test suite currently contains **25 passing tests** covering:
 
 - User creation and input validation
 - Successful and unsuccessful login
@@ -219,10 +224,18 @@ The test suite covers:
 - Missing authentication token
 - Logout and session revocation
 - Refresh-token rejection after logout
+- Expired access-token and refresh-token rejection
 - Student access to their own tasks
 - Student task-status and work-note updates
 - Student restrictions on task creation and deletion
 - Prevention of access to another student's tasks
+- Prevention of updating another student's task
+- Student profile updates and duplicate-email validation
+- Teacher access restrictions on student profile updates
+- Teacher task updates and deletion
+- Rejection of task assignment to an invalid student
+
+API endpoints can also be tested manually using Swagger UI or Postman.
 
 ## Git Branch
 

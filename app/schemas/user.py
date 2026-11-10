@@ -1,4 +1,3 @@
-
 from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
@@ -29,3 +28,9 @@ class UserResponse(BaseModel):
     phone: str = Field(pattern=r"^\d{10}$")
     status: Literal["active", "inactive"]
     tasks: list[TaskInfo] = Field(default_factory=list)
+
+
+class UserProfileUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=3, max_length=50)
+    email: EmailStr | None = None
+    phone: str | None = Field(default=None, pattern=r"^\d{10}$")
