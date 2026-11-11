@@ -227,3 +227,118 @@ def test_teacher_cannot_assign_task_to_invalid_student(
     )
 
     assert response.status_code == 404
+
+def test_teacher_can_paginate_tasks(client, teacher_token, student_user):
+    headers = {"Authorization": f"Bearer {teacher_token}"}
+
+    for i in range(3):
+        response = client.post(
+            "/tasks",
+            headers=headers,
+            json={
+                "title": f"Pagination Task {i}",
+                "description": "Testing pagination",
+                "status": "pending",
+                "user_id": student_user["id"]
+            }
+        )
+        assert response.status_code == 201
+
+    page_one = client.get("/tasks?page=1&limit=2", headers=headers)
+    page_two = client.get("/tasks?page=2&limit=2", headers=headers)
+
+    assert page_one.status_code == 200
+    assert page_two.status_code == 200
+    assert len(page_one.json()) == 2
+    assert len(page_two.json()) == 1
+
+
+def test_teacher_can_search_tasks_by_title(
+    client, teacher_token, student_user
+):
+    headers = {"Authorization": f"Bearer {teacher_token}"}
+
+    client.post(
+        "/tasks",
+        headers=headers,
+        json={
+            "title": "Python Testing",
+            "description": "Test search",
+            "status": "pending",
+            "user_id": student_user["id"]
+        }
+    )
+
+    response = client.get("/tasks?search=Python", headers=headers)
+
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+    assert response.json()[0]["title"] == "Python Testing"
+
+
+def test_teacher_can_filter_tasks_by_status(
+    client, teacher_token, student_user
+):
+    headers = {"Authorization": f"Bearer {teacher_token}"}
+
+    created = create_task(client, teacher_token, student_user["id"])
+    task_id = created.json()["id"]
+
+    client.put(
+        f"/tasks/{task_id}",
+        headers=headers,
+        json={
+            "title": "Complete Python Assignment",
+            "description": "Finish the API assignment",
+            "status": "done",
+            "user_id": student_user["id"]
+        }
+    )
+
+    response = client.get("/tasks?task_status=done", headers=headers)
+
+    assert response.status_code == 200
+    assert all(task["status"] == "done" for task in response.json())
+    assert any(task["id"] == task_id for task in response.json())
+
+
+def test_teacher_can_filter_tasks_by_assigned_user(
+    client, teacher_token, student_user
+):
+    headers = {"Authorization": f"Bearer {teacher_token}"}
+
+    created = create_task(client, teacher_token, student_user["id"])
+
+    response = client.get(
+        f"/tasks?user_id={student_user['id']}",
+        headers=headers
+    )
+
+    assert response.status_code == 200
+    assert all(
+        task["user_id"] == student_user["id"]
+        for task in response.json()
+    )
+    assert any(
+        task["id"] == created.json()["id"]
+        for task in response.json()
+    )
+
+
+def test_task_pagination_rejects_invalid_page(client, teacher_token):
+    response = client.get(
+        "/tasks?page=0",
+        headers={"Authorization": f"Bearer {teacher_token}"}
+    )
+
+    assert response.status_code == 422
+
+
+def test_task_pagination_rejects_invalid_limit(client, teacher_token):
+    response = client.get(
+        "/tasks?limit=101",
+        headers={"Authorization": f"Bearer {teacher_token}"}
+    )
+
+    assert response.status_code == 422
+

@@ -14,6 +14,7 @@ A REST API built using Python 3.13, FastAPI, SQLAlchemy, and PostgreSQL. It prov
 - Password Hashing
 - Pytest
 - Git and GitHub
+- GitHub Actions
 - Swagger UI
 
 ## Features
@@ -53,6 +54,26 @@ Available task statuses:
 - `pending`
 - `in_progress`
 - `done`
+
+Additional task listing features:
+
+- Pagination using `page` and `limit`
+- Search tasks by title using `search`
+- Filter tasks by status using `task_status`
+- Filter tasks by assigned student using `user_id`
+- Combine multiple filters in one request
+
+Example requests:
+
+```http
+GET /tasks?page=1&limit=5
+GET /tasks?search=Python
+GET /tasks?task_status=pending
+GET /tasks?user_id=2
+GET /tasks?page=1&limit=5&search=Python&task_status=pending&user_id=2
+```
+
+Pagination defaults to page 1 with 10 tasks per page. The maximum allowed limit is 100.
 
 ### Validation and Error Handling
 
@@ -190,7 +211,7 @@ http://127.0.0.1:8000/docs
 | Method | Endpoint | Description |
 |---|---|---|
 | POST | `/tasks` | Create and assign a task (teacher) |
-| GET | `/tasks` | Get all tasks (teacher) |
+| GET | `/tasks` | Get all tasks with pagination and filters (teacher) |
 | GET | `/tasks/my` | Get own assigned tasks (student) |
 | GET | `/tasks/{task_id}` | Get task by ID (teacher) |
 | PUT | `/tasks/{task_id}` | Update a task (teacher) |
@@ -213,12 +234,11 @@ Protected endpoints require a valid access token and an active session.
 Run automated tests:
 
 ```bash
-python -m pytest -q
+python -m pytest -v
 ```
 
-The test suite currently contains **25 passing tests** covering:
+The project currently contains **31 passing tests** covering:
 
-- User creation and input validation
 - Successful and unsuccessful login
 - Authenticated profile access
 - Missing authentication token
@@ -229,13 +249,32 @@ The test suite currently contains **25 passing tests** covering:
 - Student task-status and work-note updates
 - Student restrictions on task creation and deletion
 - Prevention of access to another student's tasks
-- Prevention of updating another student's task
-- Student profile updates and duplicate-email validation
-- Teacher access restrictions on student profile updates
+- Student profile updates and validation
 - Teacher task updates and deletion
 - Rejection of task assignment to an invalid student
+- Task pagination
+- Task title search
+- Task filtering by status and assigned student
+- Invalid pagination parameter validation
 
 API endpoints can also be tested manually using Swagger UI or Postman.
+
+## Continuous Integration
+
+GitHub Actions automatically runs the test suite on every push and pull request.
+
+Workflow file:
+
+`.github/workflows/tests.yml`
+
+The workflow:
+
+1. Checks out the repository.
+2. Sets up Python 3.13.
+3. Installs dependencies from `requirements.txt`.
+4. Runs all tests using `python -m pytest -v`.
+
+Check workflow results in the GitHub **Actions** tab.
 
 ## Git Branch
 

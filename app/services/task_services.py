@@ -1,3 +1,4 @@
+
 from sqlalchemy.orm import Session
 
 from app.models.task import Task
@@ -24,13 +25,28 @@ def create_task(db: Session, task_data: TaskCreate):
     return task
 
 
-def get_all_tasks(db: Session, status: str | None = None):
+def get_all_tasks(
+    db: Session,
+    status: str | None = None,
+    page: int = 1,
+    limit: int = 10,
+    search: str | None = None,
+    user_id: int | None = None
+):
     query = db.query(Task)
 
     if status:
         query = query.filter(Task.status == status)
 
-    return query.all()
+    if search:
+        query = query.filter(Task.title.ilike(f"%{search}%"))
+
+    if user_id:
+        query = query.filter(Task.user_id == user_id)
+
+    offset = (page - 1) * limit
+
+    return query.order_by(Task.id).offset(offset).limit(limit).all()
 
 
 def get_student_tasks(db: Session, student_id: int):

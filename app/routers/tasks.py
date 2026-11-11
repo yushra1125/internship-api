@@ -1,7 +1,7 @@
 
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -46,14 +46,25 @@ def add_task(
     return task
 
 
-# Teacher: View all tasks
+# Teacher: View all tasks with pagination, search and filters
 @router.get("/tasks", response_model=list[TaskResponse])
 def read_tasks(
     task_status: Literal["pending", "in_progress", "done"] | None = None,
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=10, ge=1, le=100),
+    search: str | None = Query(default=None, min_length=1),
+    user_id: int | None = Query(default=None, ge=1),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_teacher)
 ):
-    return get_all_tasks(db, task_status)
+    return get_all_tasks(
+        db=db,
+        status=task_status,
+        page=page,
+        limit=limit,
+        search=search,
+        user_id=user_id
+    )
 
 
 # Student: View own tasks
