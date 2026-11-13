@@ -2,6 +2,18 @@
 
 A REST API built using Python 3.13, FastAPI, SQLAlchemy, and PostgreSQL. It provides secure JWT authentication, session management, role-based access control (RBAC), and task management for teachers and students.
 
+## Live Deployment
+
+**Live API URL:** https://internship-api-4m9c.onrender.com
+
+**Swagger API Documentation:** https://internship-api-4m9c.onrender.com/docs
+
+**Health Check:** https://internship-api-4m9c.onrender.com/health
+
+The API is deployed on Render using a PostgreSQL database.
+
+> Note: The Render free instance may spin down after inactivity. The first request after inactivity can take some time while the service wakes up.
+
 ## Technologies Used
 
 - Python 3.13
@@ -15,6 +27,7 @@ A REST API built using Python 3.13, FastAPI, SQLAlchemy, and PostgreSQL. It prov
 - Pytest
 - Git and GitHub
 - GitHub Actions
+- Render
 - Swagger UI
 
 ## Features
@@ -22,7 +35,7 @@ A REST API built using Python 3.13, FastAPI, SQLAlchemy, and PostgreSQL. It prov
 ### Authentication
 
 - Student registration and login
-- Secure password hashing (passwords are never stored as plain text)
+- Secure password hashing
 - JWT access and refresh tokens
 - Access-token expiry and refresh functionality
 - Session tracking and refresh-token hashing
@@ -119,8 +132,6 @@ DATABASE_URL=postgresql+psycopg2://postgres:YOUR_PASSWORD@localhost:5432/interns
 SECRET_KEY=YOUR_SECRET_KEY
 ```
 
-Replace the database password with your own PostgreSQL password.
-
 Generate a secure secret key locally:
 
 ```bash
@@ -171,7 +182,7 @@ Students can register through:
 
 `POST /auth/register`
 
-## Run the API
+## Run the API Locally
 
 Start the development server:
 
@@ -182,6 +193,35 @@ python -m uvicorn main:app --reload
 Swagger UI:
 
 http://127.0.0.1:8000/docs
+
+## Render Deployment
+
+The API is deployed on Render with a PostgreSQL database.
+
+Deployment configuration:
+
+- **Platform:** Render
+- **Web service:** `internship-api`
+- **Database:** Render PostgreSQL
+- **Python version:** Python 3.13
+- **Application entry point:** `main:app`
+
+Configure the following environment variables in the Render web service:
+
+- `DATABASE_URL`
+- `SECRET_KEY`
+- `ACCESS_TOKEN_EXPIRE_MINUTES`
+- `REFRESH_TOKEN_EXPIRE_DAYS`
+
+Use the PostgreSQL connection URL provided by Render for `DATABASE_URL`. Keep all credentials and secrets private.
+
+Apply database migrations against the production database:
+
+```bash
+python -m alembic upgrade head
+```
+
+The deployed API can be accessed using the live URL and Swagger documentation linked above.
 
 ## API Endpoints
 
@@ -204,7 +244,7 @@ http://127.0.0.1:8000/docs
 | GET | `/users/{user_id}` | Get user by ID (teacher) |
 | PUT | `/users/{user_id}` | Update a user (teacher) |
 | DELETE | `/users/{user_id}` | Delete a user (teacher) |
-| PATCH | `/users/me` | Update own profile (student) |
+| PATCH | `/users/me` | Update own profile |
 
 ### Tasks
 
@@ -237,7 +277,7 @@ Run automated tests:
 python -m pytest -v
 ```
 
-The project currently contains **31 passing tests** covering:
+The project test suite contains 31 tests covering:
 
 - Successful and unsuccessful login
 - Authenticated profile access

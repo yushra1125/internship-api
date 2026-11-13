@@ -1,3 +1,4 @@
+
 import os
 from datetime import datetime, timedelta, timezone
 
@@ -5,12 +6,14 @@ import jwt
 from pwdlib import PasswordHash
 from dotenv import load_dotenv
 
+load_dotenv()
+
 password_hash = PasswordHash.recommended()
 
-load_dotenv()
 ACCESS_TOKEN_EXPIRE_MINUTES = int(
     os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15")
 )
+
 REFRESH_TOKEN_EXPIRE_DAYS = int(
     os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7")
 )
@@ -18,11 +21,9 @@ REFRESH_TOKEN_EXPIRE_DAYS = int(
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 if not SECRET_KEY:
-    raise RuntimeError("SECRET_KEY is missing from .env file")
-ALGORITHM = "HS256"
+    raise RuntimeError("SECRET_KEY is missing from environment variables")
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 15
-REFRESH_TOKEN_EXPIRE_DAYS = 7
+ALGORITHM = "HS256"
 
 
 def hash_password(password: str) -> str:
